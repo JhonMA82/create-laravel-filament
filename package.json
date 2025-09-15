@@ -1,0 +1,31 @@
+{
+  "name": "laravel-filament-installer",
+  "version": "1.0.0",
+  "description": "Asistente para instalar proyectos Laravel + Filament.",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "create-laravel-filament": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "laravel",
+    "filament",
+    "installer",
+    "cli"
+  ],
+  "author": "Tu Nombre",
+  "license": "ISC",
+  "dependencies": {
+    "boxen": "^7.1.1",
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
+    "command-exists": "^1.2.9",
+    "execa": "^8.0.1",
+    "fast-xml-parser": "^4.4.0",
+    "inquirer": "^9.2.20",
+    "ora": "^8.0.1"
+  }
+}
