@@ -1,5 +1,5 @@
 {
-  "name": "laravel-filament-installer",
+  "name": "create-laravel-filament",
   "version": "1.0.0",
   "description": "Asistente para instalar proyectos Laravel + Filament.",
   "main": "index.js",
@@ -16,7 +16,7 @@
     "installer",
     "cli"
   ],
-  "author": "Tu Nombre",
+  "author": "Juan Jose Meza",
   "license": "ISC",
   "dependencies": {
     "@clack/prompts": "^0.7.0",
