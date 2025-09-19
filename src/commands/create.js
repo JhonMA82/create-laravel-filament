@@ -179,6 +179,94 @@ return RectorConfig::configure()
   await fs.writeFile(path.join(projectPath, 'rector.php'), content)
 }
 
+/**
+ * Detecta si existen migraciones con columnas two_factor_* en el proyecto.
+ */
+async function detectTwoFactorColumnsInMigrations(projectPath) {
+  const migrationsDir = path.join(projectPath, 'database', 'migrations')
+  try {
+    const entries = await fs.readdir(migrationsDir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (!entry.isFile()) continue
+      if (!entry.name.endsWith('.php')) continue
+      const full = path.join(migrationsDir, entry.name)
+      const data = await fs.readFile(full, 'utf8')
+      if (
+        data.includes('two_factor_secret') ||
+        data.includes('two_factor_recovery_codes') ||
+        data.includes('two_factor_confirmed_at') ||
+        data.includes('two_factor_')
+      ) {
+        return true
+      }
+    }
+  } catch {}
+  return false
+}
+
+/**
+ * Parchea database/factories/UserFactory.php agregando valores por defecto (null)
+ * para columnas 2FA si aún no existen.
+ */
+async function patchUserFactoryTwoFactorDefaults(projectPath) {
+  const factoryPath = path.join(projectPath, 'database', 'factories', 'UserFactory.php')
+  let content
+  try {
+    content = await fs.readFile(factoryPath, 'utf8')
+  } catch {
+    return { patched: false, reason: 'factory_not_found' }
+  }
+
+  if (
+    content.includes('two_factor_secret') ||
+    content.includes('two_factor_recovery_codes') ||
+    content.includes('two_factor_confirmed_at')
+  ) {
+    return { patched: false, reason: 'already_present' }
+  }
+
+  // Buscar el bloque: línea con "return [" y su cierre "];" más cercano
+  const startRe = /^[ \t]*return\s*\[/m
+  const startMatch = startRe.exec(content)
+  if (!startMatch) {
+    return { patched: false, reason: 'array_not_found' }
+  }
+
+  const startIdx = startMatch.index
+  const indent = (startMatch[0].match(/^[ \t]*/) || [''])[0]
+
+  const afterStart = content.slice(startIdx)
+  const endRe = /^[ \t]*\];/m
+  const endMatch = endRe.exec(afterStart)
+  if (!endMatch) {
+    return { patched: false, reason: 'array_end_not_found' }
+  }
+
+  const arrStart = startIdx + startMatch[0].length
+  const arrEnd = startIdx + endMatch.index
+  let arr = content.slice(arrStart, arrEnd)
+
+  // Asegurar coma final antes de inyectar nuevas líneas
+  if (!arr.trimEnd().endsWith(',')) {
+    arr = arr.replace(/\s*$/, ',\n')
+  }
+
+  const injectionIndent = indent + '    '
+  const injection =
+    `${injectionIndent}'two_factor_secret' => null,\n` +
+    `${injectionIndent}'two_factor_recovery_codes' => null,\n` +
+    `${injectionIndent}'two_factor_confirmed_at' => null,\n`
+
+  const newContent = content.slice(0, arrStart) + arr + injection + content.slice(arrEnd)
+
+  if (newContent === content) {
+    return { patched: false, reason: 'replace_noop' }
+  }
+
+  await fs.writeFile(factoryPath, newContent)
+  return { patched: true }
+}
+
 async function run(cmd, opts = {}) {
   const { cwd, env } = opts
   const startedAt = Date.now()
@@ -672,6 +760,24 @@ export async function runCreate(ctx = {}) {
           const r4 = await run('php artisan migrate -n')
           events.push({ name: 'artisan_migrate', ...r4 })
           if (r4.status === 'error') throw new Error('Fallo al ejecutar migraciones')
+        },
+      },
+      {
+        title: 'Parche 2FA (UserFactory)',
+        task: async () => {
+          const has2fa = await detectTwoFactorColumnsInMigrations(projectPath)
+          events.push({
+            name: 'detect_two_factor_migration',
+            status: has2fa ? 'success' : 'skipped',
+            stdout: has2fa ? '2FA columns detected' : 'No 2FA columns detected',
+          })
+          if (!has2fa) return
+          const patch = await patchUserFactoryTwoFactorDefaults(projectPath)
+          events.push({
+            name: 'patch_user_factory_2fa',
+            status: patch.patched ? 'success' : 'skipped',
+            stdout: patch.patched ? 'UserFactory patched' : `Skipped (${patch.reason})`,
+          })
         },
       },
       {

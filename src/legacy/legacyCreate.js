@@ -1,4 +1,5 @@
 import chalk from 'chalk'
+import { promises as fs } from 'fs'
 import inquirer from 'inquirer'
 import path from 'path'
 import { chdir } from 'process'
@@ -21,6 +22,90 @@ import {
   showSummaryTable,
   startSupabase,
 } from './utils.js'
+
+/**
+ * 2FA detection and UserFactory patch helpers (legacy)
+ */
+async function detectTwoFactorColumnsInMigrations(projectPath) {
+  const migrationsDir = path.join(projectPath, 'database', 'migrations')
+  try {
+    const entries = await fs.readdir(migrationsDir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (!entry.isFile()) continue
+      if (!entry.name.endsWith('.php')) continue
+      const full = path.join(migrationsDir, entry.name)
+      const data = await fs.readFile(full, 'utf8')
+      if (
+        data.includes('two_factor_secret') ||
+        data.includes('two_factor_recovery_codes') ||
+        data.includes('two_factor_confirmed_at') ||
+        data.includes('two_factor_')
+      ) {
+        return true
+      }
+    }
+  } catch {}
+  return false
+}
+
+async function patchUserFactoryTwoFactorDefaults(projectPath) {
+  const factoryPath = path.join(projectPath, 'database', 'factories', 'UserFactory.php')
+  let content
+  try {
+    content = await fs.readFile(factoryPath, 'utf8')
+  } catch {
+    return { patched: false, reason: 'factory_not_found' }
+  }
+
+  if (
+    content.includes('two_factor_secret') ||
+    content.includes('two_factor_recovery_codes') ||
+    content.includes('two_factor_confirmed_at')
+  ) {
+    return { patched: false, reason: 'already_present' }
+  }
+
+  // Buscar el bloque: línea con "return [" y su cierre "];" más cercano
+  const startRe = /^[ \t]*return\s*\[/m
+  const startMatch = startRe.exec(content)
+  if (!startMatch) {
+    return { patched: false, reason: 'array_not_found' }
+  }
+
+  const startIdx = startMatch.index
+  const indent = (startMatch[0].match(/^[ \t]*/) || [''])[0]
+
+  const afterStart = content.slice(startIdx)
+  const endRe = /^[ \t]*\];/m
+  const endMatch = endRe.exec(afterStart)
+  if (!endMatch) {
+    return { patched: false, reason: 'array_end_not_found' }
+  }
+
+  const arrStart = startIdx + startMatch[0].length
+  const arrEnd = startIdx + endMatch.index
+  let arr = content.slice(arrStart, arrEnd)
+
+  // Asegurar coma final antes de inyectar nuevas líneas
+  if (!arr.trimEnd().endsWith(',')) {
+    arr = arr.replace(/\s*$/, ',\n')
+  }
+
+  const injectionIndent = indent + '    '
+  const injection =
+    `${injectionIndent}'two_factor_secret' => null,\n` +
+    `${injectionIndent}'two_factor_recovery_codes' => null,\n` +
+    `${injectionIndent}'two_factor_confirmed_at' => null,\n`
+
+  const newContent = content.slice(0, arrStart) + arr + injection + content.slice(arrEnd)
+
+  if (newContent === content) {
+    return { patched: false, reason: 'replace_noop' }
+  }
+
+  await fs.writeFile(factoryPath, newContent)
+  return { patched: true }
+}
 
 export const runLegacyCreate = async () => {
   // Clear console
@@ -129,6 +214,40 @@ export const runLegacyCreate = async () => {
   await setAppLocaleEs(projectPath)
 
   await runCommand('php artisan migrate -n', 'Ejecutando migraciones de Laravel')
+
+  // --- Parche condicional 2FA (UserFactory) ---
+  try {
+    const has2fa = await detectTwoFactorColumnsInMigrations(projectPath)
+    if (has2fa) {
+      const res = await patchUserFactoryTwoFactorDefaults(projectPath)
+      if (res.patched) {
+        console.log(chalk.green('✅ UserFactory actualizado con columnas 2FA por defecto (null).'))
+      } else {
+        console.log(chalk.yellow(`ℹ️ Parche 2FA omitido (${res.reason}).`))
+      }
+    } else {
+      console.log(chalk.dim('ℹ️ No se detectaron migraciones 2FA; sin cambios en UserFactory.'))
+    }
+  } catch (e) {
+    console.log(chalk.red(`⚠️ No se pudo aplicar el parche 2FA: ${e.message}`))
+  }
+
+  // --- Parche condicional 2FA (UserFactory) ---
+  try {
+    const has2fa = await detectTwoFactorColumnsInMigrations(projectPath)
+    if (has2fa) {
+      const res = await patchUserFactoryTwoFactorDefaults(projectPath)
+      if (res.patched) {
+        console.log(chalk.green('✅ UserFactory actualizado con columnas 2FA por defecto (null).'))
+      } else {
+        console.log(chalk.yellow(`ℹ️ Parche 2FA omitido (${res.reason}).`))
+      }
+    } else {
+      console.log(chalk.dim('ℹ️ No se detectaron migraciones 2FA; sin cambios en UserFactory.'))
+    }
+  } catch (e) {
+    console.log(chalk.red(`⚠️ No se pudo aplicar el parche 2FA: ${e.message}`))
+  }
 
   // --- Step 4: Filament ---
   divider(`Paso 4/${totalSteps} · Filament`)
