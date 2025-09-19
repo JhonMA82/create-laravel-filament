@@ -16,6 +16,9 @@ Asistente de línea de comandos para crear y configurar proyectos Laravel + Fila
 - [✨ Características](#-características)
 - [🧰 Requisitos](#-requisitos)
 - [🔧 Instalación](#-instalación)
+  - [Desde npmjs (recomendado)](#desde-npmjs-recomendado)
+  - [Desde GitHub (clonar)](#desde-github-clonar)
+  - [Desarrollo local](#desarrollo-local)
 - [💡 Uso](#-uso)
   - [Modo interactivo](#modo-interactivo)
   - [Modo no interactivo (CI)](#modo-no-interactivo-ci)
@@ -23,6 +26,7 @@ Asistente de línea de comandos para crear y configurar proyectos Laravel + Fila
 - [🧾 Salida JSON](#-salida-json)
 - [🎛️ TTY y Colores](#️-tty-y-colores)
 - [🗂️ Flujo de Tareas](#️-flujo-de-tareas)
+- [🧩 Herramientas instaladas](#-herramientas-instaladas)
 - [🏗️ Arquitectura Interna](#️-arquitectura-interna)
 - [🤝 Contribuir](#-contribuir)
 - [🛠️ Tecnologías](#️-tecnologías)
@@ -79,6 +83,24 @@ Notas:
 
 ## 🔧 Instalación
 
+### Desde npmjs (recomendado)
+
+Ejecuta directamente sin clonar el repo:
+
+```bash
+npm create laravel-filament@latest
+# o
+npx create-laravel-filament@latest
+# o
+pnpm dlx create-laravel-filament@latest
+# o
+yarn create laravel-filament
+# o
+bunx create-laravel-filament@latest
+```
+
+### Desde GitHub (clonar)
+
 Clona el repositorio e instala dependencias:
 
 ```bash
@@ -87,20 +109,22 @@ cd LaravelInstaller
 npm install
 ```
 
-Opciones para ejecutar:
+### Desarrollo local
 
-- Local (recomendado durante desarrollo):
+Opciones para ejecutar el CLI desde el repositorio:
+
+- Ejecución directa:
 ```bash
 node index.js
 ```
 
-- Instalar como bin global (para usar create-laravel-filament):
+- Link global temporal (expone el bin create-laravel-filament):
 ```bash
 npm link
 create-laravel-filament
 ```
 
-- Ejecutar con npm script (si defines uno):
+- NPM script (si defines uno):
 ```bash
 npm start
 ```
@@ -113,6 +137,14 @@ npm start
 
 Ejecuta el CLI sin banderas; se mostrarán prompts para nombre del proyecto, starter kit, base de datos y (si aplica) credenciales de conexión.
 
+- npmjs:
+```bash
+npm create laravel-filament@latest
+# o
+npx create-laravel-filament@latest
+```
+
+- Desarrollo local:
 ```bash
 node index.js
 ```
@@ -127,7 +159,45 @@ Ejemplo de flujo:
 
 Proporciona todas las banderas necesarias. Si falta algún dato requerido con `--non-interactive`, el CLI falla con código 1 (o emite JSON de error con `--json`).
 
-- SQLite:
+- npmjs:
+  - SQLite:
+```bash
+npx create-laravel-filament@latest create \
+  --non-interactive \
+  --project-name app \
+  --starter-kit react \
+  --db sqlite \
+  -y
+```
+
+  - MySQL:
+```bash
+npx create-laravel-filament@latest create \
+  --non-interactive \
+  --project-name app \
+  --starter-kit vue \
+  --db mysql \
+  --db-host 127.0.0.1 \
+  --db-port 3306 \
+  --db-name laravel \
+  --db-user root \
+  --db-password secret \
+  --filament-name Admin \
+  --filament-email admin@admin.com \
+  --filament-password password
+```
+
+  - Supabase (requiere Docker en ejecución):
+```bash
+npx create-laravel-filament@latest create \
+  --non-interactive \
+  --project-name app \
+  --starter-kit livewire \
+  --db supabase
+```
+
+- Desarrollo local:
+  - SQLite:
 ```bash
 node index.js create \
   --non-interactive \
@@ -137,7 +207,7 @@ node index.js create \
   -y
 ```
 
-- MySQL:
+  - MySQL:
 ```bash
 node index.js create \
   --non-interactive \
@@ -154,7 +224,7 @@ node index.js create \
   --filament-password password
 ```
 
-- Supabase (requiere Docker en ejecución):
+  - Supabase (requiere Docker en ejecución):
 ```bash
 node index.js create \
   --non-interactive \
@@ -166,6 +236,15 @@ node index.js create \
 ### Ayuda
 
 ```bash
+# npmjs
+npx create-laravel-filament@latest --help
+npx create-laravel-filament@latest create --help
+
+# instalado globalmente (npm link o npm -g)
+create-laravel-filament --help
+create-laravel-filament create --help
+
+# desarrollo local
 node index.js --help
 node index.js create --help
 ```
@@ -176,6 +255,15 @@ node index.js create --help
 
 Con `--json` el CLI imprime un único objeto JSON en stdout y suprime colores y prompts.
 
+- npmjs:
+```bash
+npx create-laravel-filament@latest create --json --non-interactive \
+  --project-name app \
+  --starter-kit react \
+  --db sqlite
+```
+
+- Desarrollo local:
 ```bash
 node index.js create --json --non-interactive \
   --project-name app \
@@ -249,6 +337,53 @@ El pipeline orquestado con Listr2 ejecuta, en orden:
 10. Localización ES: `php artisan lang:add es` y `lang:update`
 11. Pre-commit: `phpstan`, `pest`, `pint`, `rector process`
 12. Git: `git add .` y commit inicial
+
+---
+
+## 🧩 Herramientas instaladas
+
+El CLI instala y deja listas estas herramientas clave para tu flujo de trabajo:
+
+- Laravel Boost — MCP para desarrollo asistido por IA con más de 15 herramientas, guías de IA composables y una API de documentación con más de 17,000 entradas y búsqueda semántica.
+  - Bootstrap:
+  ```bash
+  php artisan boost:install
+  ```
+
+- Larastan — análisis estático (PHPStan) para detectar errores sin ejecutar el código.
+  - Ejecutar:
+  ```bash
+  ./vendor/bin/phpstan
+  ```
+
+- Pint — formateador oficial de estilo para mantener un código consistente.
+  - Ejecutar:
+  ```bash
+  ./vendor/bin/pint
+  ./vendor/bin/pint --test
+  ```
+
+- Pest — framework de pruebas expresivo sobre PHPUnit.
+  - Ejecutar:
+  ```bash
+  ./vendor/bin/pest
+  ```
+
+- Rector — refactorización automatizada; ideal para upgrades y mejoras a gran escala.
+  - Previsualizar y aplicar:
+  ```bash
+  ./vendor/bin/rector process --dry-run
+  ./vendor/bin/rector process
+  ```
+
+- Laravel Debugbar — barra de depuración para entorno local (no usar en producción).
+  - Se activa cuando `APP_DEBUG=true`.
+
+- Essentials — defaults estrictos y convenciones seguras (modelos estrictos, fechas inmutables, consola segura, HTTP fake en tests).
+  - Publicación de configuración:
+  ```bash
+  php artisan vendor:publish --tag=essentials-config
+  ```
 
 ---
 
