@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "agents": {
+    "enabled": true,
+    "directory": ".claude/agents"
+  },
+  "commands": {
+    "enabled": true,
+    "directory": ".claude/commands"
+  },
+  "project": {
+    "type": "react-vite-typescript",
+    "packageManager": "pnpm",
+    "testFramework": "vitest",
+    "styling": "tailwind"
+  },
+  "features": {
+    "stateManagement": "zustand",
+    "dataFetching": "tanstack-query",
+    "routing": "react-router",
+    "formHandling": "react-hook-form",
+    "validation": "zod"
+  },
+  "devTools": {
+    "testing": {
+      "ui": true,
+      "coverage": true
+    },
+    "linting": {
+      "autoFix": true
+    },
+    "formatting": {
+      "prettier": true
+    }
+  },
+  "optimizations": {
+    "codeSplitting": true,
+    "bundleAnalysis": true,
+    "lazyLoading": true
+  },
+  "security": {
+    "xssProtection": true,
+    "environmentVariables": "vite-only",
+    "inputValidation": true
+  }
+}

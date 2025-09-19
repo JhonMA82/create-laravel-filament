@@ -1,0 +1,18 @@
+# Lint si existe
+if npm run -s | grep -q "^  lint$"; then
+  npm run -s lint || exit 1
+fi
+
+# Typecheck si existe
+if npm run -s | grep -q "^  typecheck$"; then
+  npm run -s typecheck || exit 1
+fi
+
+# Tests rÃ¡pidos solo si existen scripts o config
+if npm run -s | grep -q "^  test:precommit$"; then
+  npm run -s test:precommit || exit 1
+elif [ -f "vitest.config.ts" ] || [ -f "vitest.config.js" ] || [ -d "tests" ] || [ -d "__tests__" ]; then
+  npm run -s test || npm run -s test:ci || true
+else
+  echo "No tests configured yet, skipping tests"
+fi

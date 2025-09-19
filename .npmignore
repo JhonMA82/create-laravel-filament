@@ -1,0 +1,68 @@
+# Meta and CI
+.git/
+.github/
+.husky/
+.changeset/
+.turbo/
+.history/
+
+# Editors and IDEs
+.vscode/
+.idea/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Reports
+coverage/
+coverage.lcov
+.nyc_output/
+report.*.json
+
+# Tests and fixtures
+test/
+tests/
+__tests__/
+__mocks__/
+fixtures/
+*.spec.*
+*.test.*
+
+# Examples and docs (README is kept)
+examples/
+docs/
+
+# Scripts and tooling (keep bin mapped by package.json)
+scripts/
+
+# Caches and temporary files
+.cache/
+.eslintcache
+tmp/
+temp/
+*.tmp
+
+# Environment files
+.env
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Lock files (exclude from package tarball)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Node modules (not published)
+node_modules/

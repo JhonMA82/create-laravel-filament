@@ -1,0 +1,54 @@
+name: publish-npm
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          registry-url: "https://registry.npmjs.org"
+      - run: npm ci || npm i --no-audit --no-fund --ignore-scripts
+      - run: npm run build --if-present
+      - run: npm test --if-present
+      - name: Get current version
+        id: version
+        run: echo "version=$(npm pkg get version | tr -d '"')" >> $GITHUB_OUTPUT
+      - name: Check if version exists on npm
+        id: check_version
+        run: |
+          if npm view create-react-ts-vite@${{ steps.version.outputs.version }} version > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Debug info
+        run: |
+          echo "Current version: ${{ steps.version.outputs.version }}"
+          echo "Version exists: ${{ steps.check_version.outputs.exists }}"
+          echo "NPM registry: $(npm config get registry)"
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+      - name: Publish to npm
+        if: steps.check_version.outputs.exists == 'false'
+        run: npm publish --access public --verbose
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Version already published
+        if: steps.check_version.outputs.exists == 'true'
+        run: echo "Version ${{ steps.version.outputs.version }} already published. Skipping npm publish."
+      - name: Verify publication
+        run: |
+          if [ "${{ github.event.release.tag_name }}" != "" ]; then
+            npm view ${{ github.event.repository.name }}@${{ github.event.release.tag_name }}
+          else
+            npm view ${{ github.event.repository.name }}
+          fi
