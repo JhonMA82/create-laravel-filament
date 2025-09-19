@@ -1,7 +1,9 @@
 name: publish-npm
 on:
   push:
-    branches: [main]
+    branches: [master]
+    tags:
+      - 'v*'
   release:
     types: [published]
 jobs:
@@ -25,7 +27,7 @@ jobs:
       - name: Check if version exists on npm
         id: check_version
         run: |
-          if npm view create-react-ts-vite@${{ steps.version.outputs.version }} version > /dev/null 2>&1; then
+          if npm view create-laravel-filament@${{ steps.version.outputs.version }} version > /dev/null 2>&1; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
