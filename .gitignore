@@ -75,6 +75,7 @@ temp/
 .claude
 
 # github
-.github
+.github/workflows/*
 .husky
+!.github/.release-please-manifest.json
 
