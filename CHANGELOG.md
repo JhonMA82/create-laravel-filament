@@ -1,0 +1,41 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [2.0.2] - 2025-09-20
+
+### Changed
+- Reconfigurar agentes Claude para gestión de versionado
+
+## [2.0.1] - 2025-09-19
+
+### Added
+- Add two-factor authentication support for UserFactory
+
+### Changed
+- Enhance README with npm installation and tools documentation
+- Bump version to 2.0.1 for README documentation update
+
+### Fixed
+- Configure GitHub Actions workflow for proper npm publishing
+
+## [2.0.0] - 2025-09-19
+
+### Added
+- Major release with breaking changes
+- Package name change and architectural rewrite
+
+## [1.0.0] - 2025-09-19
+
+### Added
+- Initial release
+- Laravel + Filament project scaffolding
+- Interactive CLI with multiple database support
+- Starter kits integration (React/Vue/Livewire)
+- Development tools setup
+- Spanish localization support
