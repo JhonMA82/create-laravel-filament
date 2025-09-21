@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.3] - 2025-09-20
+
+### Changed
+- Mejorar verificación de consistencia de versiones cross-platform
+- Añadir menú final con opción para abrir VS Code
+- Actualizar patrones de .gitignore para herramientas de desarrollo
+
 ## [2.0.2] - 2025-09-20
 
 ### Changed
