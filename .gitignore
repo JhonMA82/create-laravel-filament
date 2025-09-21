@@ -70,3 +70,11 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+
+# claude
+.claude
+
+# github
+.github
+.husky
+
