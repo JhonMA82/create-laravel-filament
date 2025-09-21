@@ -303,6 +303,36 @@ function dbLabelOf(db) {
       return db
   }
 }
+/**
+ * Muestra un menú al finalizar el proceso con opciones para el usuario
+ */
+async function showFinalMenu(projectPath, colorOn) {
+  const { select } = await import('@clack/prompts')
+
+  const option = await select({
+    message: '🎯 ¿Qué te gustaría hacer ahora?',
+    options: [
+      { value: 'vscode', label: 'Abrir VS Code' },
+      { value: 'exit', label: 'No hacer nada y terminar' },
+    ],
+  })
+
+  return option
+}
+
+/**
+ * Abre VS Code en el directorio especificado
+ */
+async function openVSCode(projectPath) {
+  const { execa } = await import('execa')
+
+  try {
+    await execa('code', [projectPath], { shell: true })
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: error.message }
+  }
+}
 
 /**
  * Prompts con Clack (interactivo)
@@ -1031,6 +1061,21 @@ export async function runCreate(ctx = {}) {
         ? chalk.bold('\n¡Que disfrutes tu nuevo proyecto! 🚀')
         : '\n¡Que disfrutes tu nuevo proyecto! 🚀'
       console.log(done)
+
+      // Mostrar menú de opciones al finalizar el proceso
+      const option = await showFinalMenu(projectPath, colorOn)
+
+      if (option === 'vscode') {
+        const result = await openVSCode(projectPath)
+        if (!result.success) {
+          const errorMsg = colorOn
+            ? chalk.red.bold(`\nError al abrir VS Code: ${result.error}`)
+            : `\nError al abrir VS Code: ${result.error}`
+          console.error(errorMsg)
+        }
+      }
+      // Si la opción es 'exit' o cualquier otra, simplemente terminamos
+
       process.exit(0)
     }
   } catch (err) {
