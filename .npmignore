@@ -66,3 +66,4 @@ yarn.lock
 
 # Node modules (not published)
 node_modules/
+.claude
