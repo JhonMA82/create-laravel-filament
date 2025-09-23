@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Actualizar dependencias a versiones más recientes (@clack/prompts, boxen, commander, execa, fast-xml-parser, inquirer, listr2, ora)
+
 ## [2.0.4] - 2025-09-20
 
 ### Fixed
