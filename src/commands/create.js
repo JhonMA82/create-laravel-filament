@@ -887,19 +887,13 @@ export async function runCreate(ctx = {}) {
       {
         title: 'Essentials',
         task: async () => {
-          const r1 = await run(
-            'composer config repositories.essentials-fork vcs https://github.com/JhonMA82/essentials',
-          )
-          events.push({ name: 'composer_config_essentials_repo', ...r1 })
-          if (r1.status === 'error') throw new Error('Fallo configurando repo Essentials')
+          const r1 = await run('composer require nunomaduro/essentials -q -n')
+          events.push({ name: 'composer_essentials', ...r1 })
+          if (r1.status === 'error') throw new Error('Fallo instalando Essentials')
 
-          const r2 = await run('composer require nunomaduro/essentials:0.1.1 -q -n')
-          events.push({ name: 'composer_essentials', ...r2 })
-          if (r2.status === 'error') throw new Error('Fallo instalando Essentials')
-
-          const r3 = await run('php artisan vendor:publish --tag=essentials-config -n -q')
-          events.push({ name: 'artisan_vendor_publish_essentials', ...r3 })
-          if (r3.status === 'error') throw new Error('Fallo publicando configuración de Essentials')
+          const r2 = await run('php artisan vendor:publish --tag=essentials-config -n -q')
+          events.push({ name: 'artisan_vendor_publish_essentials', ...r2 })
+          if (r2.status === 'error') throw new Error('Fallo publicando configuración de Essentials')
         },
       },
       {
