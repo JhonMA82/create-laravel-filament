@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.6] - 2025-09-24
+
+### Changed
+- Simplificar instalación eliminando configuración de repositorio fork de Essentials
+- Optimizar código eliminando pasos redundantes
+
 ## [2.0.5] - 2025-09-22
 
 ### Changed

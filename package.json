@@ -1,6 +1,6 @@
 {
   "name": "create-laravel-filament",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Asistente para instalar proyectos Laravel + Filament.",
   "main": "index.js",
   "type": "module",
